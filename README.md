@@ -1,8 +1,10 @@
 # influxdb-cxx
 
-[![Build Status](https://travis-ci.com/awegrzyn/influxdb-cxx.svg?branch=master)](https://travis-ci.com/awegrzyn/influxdb-cxx)
-[![codecov](https://codecov.io/gh/awegrzyn/influxdb-cxx/branch/master/graph/badge.svg)](https://codecov.io/gh/awegrzyn/influxdb-cxx)
+Warning! Warning! Warning!
 
+This fork breaks UDP and socket transport!
+
+The goal was to play around with orgs and auth tokens
 
 InfluxDB C++ client library
  - Batch write

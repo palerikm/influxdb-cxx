@@ -37,8 +37,8 @@ std::unique_ptr<Transport> withUnixSocketTransport(const http::url& /*uri*/) {
 }
 #endif
 
-std::unique_ptr<Transport> withHttpTransport(const http::url& uri) {
-  auto transport = std::make_unique<transports::HTTP>(uri.url);
+std::unique_ptr<Transport> withHttpTransport(const http::url& uri, const std::string& org, const std::string& token) {
+  auto transport = std::make_unique<transports::HTTP>(uri.url, org, token);
   if (!uri.user.empty()) {
     transport->enableBasicAuth(uri.user + ":" + uri.password);
   }
@@ -49,12 +49,13 @@ std::unique_ptr<Transport> withHttpTransport(const http::url& uri) {
   return transport;
 }
 
-std::unique_ptr<Transport> InfluxDBFactory::GetTransport(std::string url) {
-  static const std::map<std::string, std::function<std::unique_ptr<Transport>(const http::url&)>> map = {
-    {"udp", withUdpTransport},
+std::unique_ptr<Transport> InfluxDBFactory::GetTransport(std::string url, const std::string& org, const std::string& token) {
+
+    static const std::map<std::string, std::function<std::unique_ptr<Transport>(const http::url&, const std::string&, const std::string&)>> map = {
+    //{"udp", withUdpTransport},
     {"http", withHttpTransport},
     {"https", withHttpTransport},
-    {"unix", withUnixSocketTransport},
+    //{"unix", withUnixSocketTransport},
   };
 
   http::url parsedUrl = http::ParseHttpUrl(url);
@@ -67,12 +68,12 @@ std::unique_ptr<Transport> InfluxDBFactory::GetTransport(std::string url) {
     throw InfluxDBException("InfluxDBFactory::GetTransport", "Unrecognized backend " + parsedUrl.protocol);
   }
 
-  return iterator->second(parsedUrl);
+  return iterator->second(parsedUrl, org, token);
 }
 
-std::unique_ptr<InfluxDB> InfluxDBFactory::Get(std::string url)
+std::unique_ptr<InfluxDB> InfluxDBFactory::Get(std::string url, const std::string& org, const std::string& token)
 {
-  return std::make_unique<InfluxDB>(InfluxDBFactory::GetTransport(url));
+  return std::make_unique<InfluxDB>(InfluxDBFactory::GetTransport(url, org, token));
 }
 
 } // namespace influxdb

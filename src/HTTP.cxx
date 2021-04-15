@@ -11,13 +11,13 @@ namespace influxdb
 namespace transports
 {
 
-HTTP::HTTP(const std::string& url)
+HTTP::HTTP(const std::string& url, const std::string& org, const std::string& token)
 {
-  initCurl(url);
+  initCurl(url, org, token);
   initCurlRead(url);
 }
 
-void HTTP::initCurl(const std::string& url)
+void HTTP::initCurl(const std::string& url, const std::string& org, const std::string& token)
 {
   CURLcode globalInitResult = curl_global_init(CURL_GLOBAL_ALL);
   if (globalInitResult != CURLE_OK) {
@@ -30,12 +30,25 @@ void HTTP::initCurl(const std::string& url)
      throw InfluxDBException("HTTP::initCurl", "Database not specified");
   }
   if (writeUrl.at(position - 1) != '/') {
-    writeUrl.insert(position, "/write");
+    writeUrl.insert(position, "/api/v2/write");
   } else {
-    writeUrl.insert(position, "write");
+    writeUrl.insert(position, "api/v2write");
   }
+
+  writeUrl.append("&org=");
+  writeUrl.append(org);
+
   writeHandle = curl_easy_init();
   curl_easy_setopt(writeHandle, CURLOPT_URL,  writeUrl.c_str());
+
+  curl_easy_setopt(writeHandle, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+
+  struct curl_slist *headerlist = NULL;
+
+  std::string token_str = "Authorization: Token " + token;
+  headerlist = curl_slist_append(headerlist, token_str.c_str());
+  curl_easy_setopt(writeHandle, CURLOPT_HTTPHEADER, headerlist);
+
   curl_easy_setopt(writeHandle, CURLOPT_SSL_VERIFYPEER, 0);
   curl_easy_setopt(writeHandle, CURLOPT_CONNECTTIMEOUT, 10);
   curl_easy_setopt(writeHandle, CURLOPT_TIMEOUT, 10);

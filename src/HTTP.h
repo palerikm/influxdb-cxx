@@ -20,7 +20,7 @@ class HTTP : public Transport
 {
   public:
     /// Constructor
-    HTTP(const std::string& url);
+    HTTP(const std::string& url, const std::string& org, const std::string& token);
 
     /// Default destructor
     ~HTTP();
@@ -43,7 +43,7 @@ class HTTP : public Transport
 
     /// Initilizes CURL for writting and common options
     /// \throw InfluxDBException	if database (?db=) not specified
-    void initCurl(const std::string& url);
+    void initCurl(const std::string& url, const std::string& org, const std::string& token);
 
     /// Initializes CURL for reading
     void initCurlRead(const std::string& url);
